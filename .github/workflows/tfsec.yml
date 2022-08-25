@@ -1,4 +1,4 @@
-name: tfsec
+name: tfsec-pr-commenter
 on:
   push:
     branches:
@@ -6,11 +6,13 @@ on:
   pull_request:
 jobs:
   tfsec:
-    name: tfsec
+    name: tfsec PR commenter
     runs-on: ubuntu-latest
 
     steps:
       - name: Clone repo
         uses: actions/checkout@master
       - name: tfsec
-        uses: aquasecurity/tfsec-action@v1.0.0
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+        with:
+          github_token: ${{ github.token }}
