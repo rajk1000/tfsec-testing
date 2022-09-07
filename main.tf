@@ -1,7 +1,7 @@
 variable "region" {
   default = "eu-west-2"
 }
-
+#raj added a comment
 provider "aws" {
   alias  = "sandbox"
   region = var.region
