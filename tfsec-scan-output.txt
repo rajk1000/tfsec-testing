@@ -131,7 +131,7 @@ Result #5 LOW Bucket does not have a corresponding public access block.
   ──────────────────────────────────────────
   modules downloaded   0
   modules processed    1
-  blocks processed     3
+  blocks processed     4
   files read           1
 
   results

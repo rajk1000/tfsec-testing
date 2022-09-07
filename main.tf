@@ -36,6 +36,6 @@ resource "aws_s3_bucket" "foo-bucket" {
   acl           = "private"
 }
 
-#module "raj_otherstuff" {
-#  source = "./modules/otherstuff"
-#}
+module "raj_otherstuff" {
+  source = "./modules/otherstuff"
+}
