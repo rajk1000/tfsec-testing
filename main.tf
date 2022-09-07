@@ -1,7 +1,7 @@
 variable "region" {
   default = "eu-west-2"
 }
-#raj added a comment
+#raj added a new comment
 provider "aws" {
   alias  = "sandbox"
   region = var.region
@@ -36,6 +36,6 @@ resource "aws_s3_bucket" "foo-bucket" {
   acl           = "private"
 }
 
-module "raj_otherstuff" {
-  source = "./modules/otherstuff"
-}
+#module "raj_otherstuff" {
+#  source = "./modules/otherstuff"
+#}
