@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 PREFIX="pre-commit:"
 RESULTS_FILE=tfsec-scan-output.txt
 TFSEC_RESULTS_DIR=/tmp/tfsec-results
