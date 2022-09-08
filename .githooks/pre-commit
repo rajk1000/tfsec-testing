@@ -1,120 +1,131 @@
 #!/bin/bash
 #set -x
 PREFIX="pre-commit:"
-RESULTS_FILE=tfsec-scan-output.txt
-TFSEC_RESULTS_DIR=/tmp/tfsec-results
-TFSEC_WORKING_DIR=/tmp/tfsec-files
+# the filename used to hold the latest results of any tfsec scan
+RESULTS_FILE="tfsec-scan-output.txt"
+# the directory where the tfscan results file is written
+TFSEC_RESULTS_DIR="/tmp/tfsec-results"
+# the directory where all the terraform files that are to be scanned, are copied to.
+TFSEC_WORKING_DIR="/tmp/tfsec-files"
 
 initialise() {
-    mkdir -p $TFSEC_WORKING_DIR
-    mkdir -p $TFSEC_RESULTS_DIR
-    rm  $TFSEC_WORKING_DIR/* 2> /dev/null
-    rm  $TFSEC_RESULTS_DIR/* 2> /dev/null
-    ALLOW_TFSEC_ISSUES="no"
+  mkdir -p "$TFSEC_WORKING_DIR"
+  mkdir -p "$TFSEC_RESULTS_DIR"
+  rm "$TFSEC_WORKING_DIR"/* 2>/dev/null
+  rm "$TFSEC_RESULTS_DIR"/* 2>/dev/null
+  ALLOW_TFSEC_ISSUES="no"
 }
 
-populateGlobalVars() {
-    stagedFileList=$(git diff --diff-filter=d --cached --name-only)
-    tfFileList=$(echo "$stagedFileList" | grep -E '\.(tf)$')
-    if [[ ! -z "$tfFileList" ]] && [ ${#tfFileList[@]} -gt 0 ]; 
+populate-global-vars() {
+  STAGED_FILE_LIST="$(git diff --diff-filter=d --cached --name-only)"
+  TF_FILE_LIST="$(echo "$STAGED_FILE_LIST" | grep -E '\.(tf)$')"
+  if [[ ! -z "$TF_FILE_LIST" ]] && [[ ${#TF_FILE_LIST[@]} -gt 0 ]];
+  then
+    TERRAFORM_FILES_STAGED="yes"
+  else
+    TERRAFORM_FILES_STAGED="no"
+  fi
+}
+
+copy-tf-files-to-be-scanned() {
+  show-msg "Performing a tfsec scan on the terraform files you have staged (only terraform .tf files will be parsed)."
+  show-msg "The list of files to be scanned by tfsec will be as follows.."
+
+  # browse through ALL files , not only the TF files
+  for value in ${STAGED_FILE_LIST}
+  do
+    # copy all TF files to /tmp/tfsec-files
+    if [[ $value == *.tf ]]
     then
-        TERRAFORM_FILES_STAGED="yes"
+      show-msg "FILE: $value"
+      cp "$value" "$TFSEC_WORKING_DIR"
+    fi
+
+    # check if the tfsec-scan-output file has been staged
+    if [[ $value == $RESULTS_FILE ]]
+    then
+      # by staging this file, the user has indicated that they want to allow through the commit despite the tfsec issues.
+      ALLOW_TFSEC_ISSUES="yes"
+      # also copy this to the same directory so that a diff can take place later between this staged file and the latest scan output
+      cp "$value" "$TFSEC_WORKING_DIR"
+    fi
+  done
+}
+
+remove-timing-stats-from-scan-output() {
+    # remove any timing stats from the file, as these are problematic when doing a diff
+    # firstly, save the file before any sed replacement just in case we wish to troubleshoot
+    cp "$TFSEC_RESULTS_DIR/$RESULTS_FILE" "$TFSEC_RESULTS_DIR"/tfsec-scan-output-orig.txt
+    sed -i '/^  disk i/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+    sed -i '/^  parsing/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+    sed -i '/^  adaptation/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+    sed -i '/^  checks/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+    sed -i '/^  total/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+}
+
+allow-commit-despite-tfsec-issues() {
+    show-msg "Your Commit is being let through despite tfsec issues!!!"
+    show-msg "You have indicated that we should let the commit go through, but please review the tfsec issues detected with the team!"
+    show-msg "The tfsec-scan-output.txt file has details of these tfsec issues shown and has been committed too"
+}
+
+deny-commit-tfsec-not-up-to-date() {
+    show-err "Your Commit is disallowed and has been aborted!!!"
+    show-err "Even though you have GIT add(ed) your $RESULTS_FILE file, it is not up to date."
+    show-msg "Please check the latest issues in $TFSEC_RESULTS_DIR/$RESULTS_FILE and see if you wish to still ignore"
+    show-msg "If you still wish to ignore issues, please GIT add the latest file $TFSEC_RESULTS_DIR/$RESULTS_FILE"
+}
+
+deny-commit-outstanding-tfsec-issues() {
+    show-err "Your Commit is disallowed and has been aborted!!!"
+    show-err "You should aim to fix the above reported tfsec issues."
+    show-err "The output of the tfsec scan was also written to the file $TFSEC_RESULTS_DIR/$RESULTS_FILE"
+    show-msg "NOTE : If you cannot fix and instead want these to be reviewed, please GIT add the following file"
+    show-msg "NOTE : (The file to GIT add is $TFSEC_RESULTS_DIR/$RESULTS_FILE)"
+    show-msg "NOTE : If you GIT add the above file, the commit will be allowed through"
+}
+
+show-msg() {
+  echo "$PREFIX - INFO - ${1}"
+}
+
+show-err() {
+  echo "$PREFIX - ERROR - ${1}"
+}
+
+# *****************************************************************************************
+#
+# The start of the main program.
+# This is a pre-commit hook performing tfsec scan of terraform files that have been staged.
+#
+# *****************************************************************************************
+initialise
+populate-global-vars
+
+if [[ "$TERRAFORM_FILES_STAGED" = "yes" ]];
+then
+  copy-tf-files-to-be-scanned
+
+  # do the latest tfsec scan on the files that have been staged
+  if ! tfsec "$TFSEC_WORKING_DIR" --no-colour --out "$TFSEC_RESULTS_DIR/$RESULTS_FILE";
+  then
+    remove-timing-stats-from-scan-output
+
+    if [[ "$ALLOW_TFSEC_ISSUES" = "yes" ]]
+    then
+      # check that the file added is exactly the same as the latest tfsec issues. They must be identical in order for the commit to be allowed through
+      DIFF_RESULT="$(diff "$TFSEC_RESULTS_DIR/$RESULTS_FILE" "$TFSEC_WORKING_DIR/$RESULTS_FILE")"
+      if [ $? -eq 0 ]
+      then
+        allow-commit-despite-tfsec-issues
+        exit 0
+      else
+        deny-commit-tfsec-not-up-to-date
+        exit 1
+      fi
     else
-        TERRAFORM_FILES_STAGED="no"
+      deny-commit-outstanding-tfsec-issues
+      exit 1
     fi
-
-}
-
-copyTerraformFilesToBeScanned() {
-
-    echo "$PREFIX Performing a tfsec scan on the terraform files you have staged (only terraform .tf files will be parsed)."
-    echo "$PREFIX The list of files to be scanned by tfsec will be as follows.."
-
-    #browse through ALL files , not only the TF files
-    for value in ${stagedFileList}
-    do
-        # copy all TF files to /tmp/tfsec-files
-        if [[ $value == *.tf ]]
-        then
-	        echo "$PREFIX FILE: $value"
-            cp "$value" "$TFSEC_WORKING_DIR"
-        fi
-        
-        # check if the tfsec-scan-output file has been staged
-        if [[ $value == $RESULTS_FILE ]]
-        then
-            # by staging this file, the user has indicated that they want to allow through the commit despite the tfsec issues.
-            ALLOW_TFSEC_ISSUES="yes"
-            # also copy this to the same directory so that a diff can take place later between this staged file and the latest scan output
-            cp "$value" "$TFSEC_WORKING_DIR"
-            
-        fi
-    done
-}
-
-removeTimingStatsFromScanOutput() {
-    #remove any timing stats from the file, as these are problematic when doing a diff
-    #Firstly, save the file before any sed replacement just in case we wish to troubleshoot
-    cp $TFSEC_RESULTS_DIR/$RESULTS_FILE $TFSEC_RESULTS_DIR/tfsec-scan-output-orig.txt 
-    sed -i '/^  disk i/d' $TFSEC_RESULTS_DIR/$RESULTS_FILE
-    sed -i '/^  parsing/d' $TFSEC_RESULTS_DIR/$RESULTS_FILE
-    sed -i '/^  adaptation/d' $TFSEC_RESULTS_DIR/$RESULTS_FILE
-    sed -i '/^  checks/d' $TFSEC_RESULTS_DIR/$RESULTS_FILE
-    sed -i '/^  total/d' $TFSEC_RESULTS_DIR/$RESULTS_FILE
-}
-
-
-informUserThatWeAllowCommitThroughDespiteTfsecIssues() {
-    echo "$PREFIX Your Commit is being let through despite tfsec issues!!!"
-    echo "$PREFIX You have indicated that we should let the commit go through, but please review the tfsec issues detected with the team!"
-    echo "$PREFIX The tfsec-scan-output.txt file has details of these tfsec issues shown and has been committed too"
-}
-               
-informUserThatWeDenyCommitBecauseTfSecNotUptoDate() {
-    echo "$PREFIX Your Commit is disallowed and has been aborted!!!"
-    echo "$PREFIX Even though you have GIT add(ed) your $RESULTS_FILE file, it is not up to date."
-    echo "$PREFIX Please check the latest issues in $TFSEC_RESULTS_DIR/$RESULTS_FILE and see if you wish to still ignore"
-    echo "$PREFIX If you still wish to ignore issues, please GIT add the latest file $TFSEC_RESULTS_DIR/$RESULTS_FILE"
-}
-
-                
-informUserThatWeDenyCommitBecauseOutstandingTfSecIssues() {
-    echo "$PREFIX Your Commit is disallowed and has been aborted!!!"
-    echo "$PREFIX You should aim to fix the above reported tfsec issues."
-    echo "$PREFIX The output of the tfsec scan was also written to the file $TFSEC_RESULTS_DIR/$RESULTS_FILE"
-    echo "$PREFIX NOTE : If you cannot fix and instead want these to be reviewed, please GIT add the following file"
-    echo "$PREFIX NOTE : (The file to GIT add is $TFSEC_RESULTS_DIR/$RESULTS_FILE)"
-    echo "$PREFIX NOTE : If you GIT add the above file, the commit will be allowed through"
-}
-
-
-initialise;
-populateGlobalVars;
-
-if [ "$TERRAFORM_FILES_STAGED" = "yes" ]; then
-
-    copyTerraformFilesToBeScanned;
-
-    #Do the latest tfsec scan on the files that have been staged    
-    if ! tfsec $TFSEC_WORKING_DIR --no-colour --out $TFSEC_RESULTS_DIR/$RESULTS_FILE; then
-
-        removeTimingStatsFromScanOutput;
-   
-        if [ "$ALLOW_TFSEC_ISSUES" = "yes" ]
-	    then
-            #Check that the file added is exactly the same as the latest tfsec issues. They must be identical in order for the commit to be allowed through
-            diffResult=$(diff $TFSEC_RESULTS_DIR/$RESULTS_FILE $TFSEC_WORKING_DIR/$RESULTS_FILE)
-            if [ $? -eq 0 ]
-            then
-                informUserThatWeAllowCommitThroughDespiteTfsecIssues;
-                exit 0
-            else
-                informUserThatWeDenyCommitBecauseTfSecNotUptoDate;
-                exit 1
-            fi
-	    else
-            informUserThatWeDenyCommitBecauseOutstandingTfSecIssues;
-	        exit 1
-	    fi    
-    fi
+  fi
 fi
