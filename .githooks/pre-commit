@@ -53,36 +53,36 @@ copy-tf-files-to-be-scanned() {
 }
 
 remove-timing-stats-from-scan-output() {
-    # remove any timing stats from the file, as these are problematic when doing a diff
-    # firstly, save the file before any sed replacement just in case we wish to troubleshoot
-    cp "$TFSEC_RESULTS_DIR/$RESULTS_FILE" "$TFSEC_RESULTS_DIR"/tfsec-scan-output-orig.txt
-    sed -i '/^  disk i/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
-    sed -i '/^  parsing/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
-    sed -i '/^  adaptation/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
-    sed -i '/^  checks/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
-    sed -i '/^  total/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+  # remove any timing stats from the file, as these are problematic when doing a diff
+  # firstly, save the file before any sed replacement just in case we wish to troubleshoot
+  cp "$TFSEC_RESULTS_DIR/$RESULTS_FILE" "$TFSEC_RESULTS_DIR"/tfsec-scan-output-orig.txt
+  sed -i '/^  disk i/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+  sed -i '/^  parsing/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+  sed -i '/^  adaptation/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+  sed -i '/^  checks/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+  sed -i '/^  total/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
 }
 
 allow-commit-despite-tfsec-issues() {
-    show-msg "Your Commit is being let through despite tfsec issues!!!"
-    show-msg "You have indicated that we should let the commit go through, but please review the tfsec issues detected with the team!"
-    show-msg "The tfsec-scan-output.txt file has details of these tfsec issues shown and has been committed too"
+  show-msg "Your Commit is being let through despite tfsec issues!!!"
+  show-msg "You have indicated that we should let the commit go through, but please review the tfsec issues detected with the team!"
+  show-msg "The tfsec-scan-output.txt file has details of these tfsec issues shown and has been committed too"
 }
 
 deny-commit-tfsec-not-up-to-date() {
-    show-err "Your Commit is disallowed and has been aborted!!!"
-    show-err "Even though you have GIT add(ed) your $RESULTS_FILE file, it is not up to date."
-    show-msg "Please check the latest issues in $TFSEC_RESULTS_DIR/$RESULTS_FILE and see if you wish to still ignore"
-    show-msg "If you still wish to ignore issues, please GIT add the latest file $TFSEC_RESULTS_DIR/$RESULTS_FILE"
+  show-err "Your Commit is disallowed and has been aborted!!!"
+  show-err "Even though you have GIT add(ed) your $RESULTS_FILE file, it is not up to date."
+  show-msg "Please check the latest issues in $TFSEC_RESULTS_DIR/$RESULTS_FILE and see if you wish to still ignore"
+  show-msg "If you still wish to ignore issues, please GIT add the latest file $TFSEC_RESULTS_DIR/$RESULTS_FILE"
 }
 
 deny-commit-outstanding-tfsec-issues() {
-    show-err "Your Commit is disallowed and has been aborted!!!"
-    show-err "You should aim to fix the above reported tfsec issues."
-    show-err "The output of the tfsec scan was also written to the file $TFSEC_RESULTS_DIR/$RESULTS_FILE"
-    show-msg "NOTE : If you cannot fix and instead want these to be reviewed, please GIT add the following file"
-    show-msg "NOTE : (The file to GIT add is $TFSEC_RESULTS_DIR/$RESULTS_FILE)"
-    show-msg "NOTE : If you GIT add the above file, the commit will be allowed through"
+  show-err "Your Commit is disallowed and has been aborted!!!"
+  show-err "You should aim to fix the above reported tfsec issues."
+  show-err "The output of the tfsec scan was also written to the file $TFSEC_RESULTS_DIR/$RESULTS_FILE"
+  show-msg "NOTE : If you cannot fix and instead want these to be reviewed, please GIT add the following file"
+  show-msg "NOTE : (The file to GIT add is $TFSEC_RESULTS_DIR/$RESULTS_FILE)"
+  show-msg "NOTE : If you GIT add the above file, the commit will be allowed through"
 }
 
 show-msg() {
