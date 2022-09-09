@@ -38,7 +38,7 @@ resource "aws_s3_bucket" "foo-bucket" {
 
 #hello world commenting
 # more commenting to test this out
-# yet another comment to test
+# yet another comment to test out
 # even more stuff helloooooo there
 #yet one more
 module "raj_otherstuff" {
