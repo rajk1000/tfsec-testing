@@ -26,7 +26,7 @@ initialise() {
 # *****************************************************************************************
 create-directory() {
   # first check if working directory already exists
-  if [[ -d ${1} ]];
+  if [[ -d ${1} ]]
   then
     #remove directory and any contents
     rm -r "${1}"
@@ -43,7 +43,7 @@ create-directory() {
 check-staged-files-to-populate-global-vars() {
   STAGED_FILE_LIST="$(git diff --diff-filter=d --cached --name-only)"
   TF_FILE_LIST="$(echo "$STAGED_FILE_LIST" | grep -E '\.(tf)$')"
-  if [[ ! -z "$TF_FILE_LIST" ]] && [[ ${#TF_FILE_LIST[@]} -gt 0 ]];
+  if [[ ! -z "$TF_FILE_LIST" ]] && [[ ${#TF_FILE_LIST[@]} -gt 0 ]]
   then
     TERRAFORM_FILES_STAGED="yes"
   else
@@ -63,22 +63,22 @@ copy-tf-files-to-be-scanned() {
   show-msg "The list of files to be scanned by tfsec will be as follows.."
 
   # browse through ALL files , not only the TF files
-  for value in ${STAGED_FILE_LIST}
+  for VALUE in ${STAGED_FILE_LIST}
   do
     # copy all TF files to /tmp/tfsec-files
-    if [[ $value == *.tf ]]
+    if [[ $VALUE == *.tf ]]
     then
-      show-msg "FILE: $value"
-      cp "${value}" "${TFSEC_WORKING_DIR}"
+      show-msg "FILE: $VALUE"
+      cp "${VALUE}" "${TFSEC_WORKING_DIR}"
     fi
 
     # check if the tfsec-scan-output file has been staged
-    if [[ $value == $RESULTS_FILE ]]
+    if [[ $VALUE == $RESULTS_FILE ]]
     then
       # by staging this file, the user has indicated that they want to allow through the commit despite the tfsec issues.
       ALLOW_TFSEC_ISSUES="yes"
       # also copy this to the same directory so that a diff can take place later between this staged file and the latest scan output
-      cp "${value}" "${TFSEC_WORKING_DIR}"
+      cp "${VALUE}" "${TFSEC_WORKING_DIR}"
     fi
   done
 }
@@ -132,7 +132,8 @@ deny-commit-outstanding-tfsec-issues() {
   show-err "You should aim to fix the above reported tfsec issues."
   show-err "The output of the tfsec scan was also written to the file $TFSEC_RESULTS_DIR/$RESULTS_FILE"
   show-msg "NOTE : If you cannot fix and instead want these to be reviewed, please GIT add the following file"
-  show-msg "NOTE : (The file to GIT add is $TFSEC_RESULTS_DIR/$RESULTS_FILE)"
+  show-msg "NOTE : (The file to GIT add is $RESULTS_FILE)"
+  show-msg "NOTE : (Please copy to your home directory from $TFSEC_RESULTS_DIR/$RESULTS_FILE)"
   show-msg "NOTE : If you GIT add the above file, the commit will be allowed through"
 }
 
@@ -166,7 +167,7 @@ initialise
 check-staged-files-to-populate-global-vars
 
 # if there are staged terraform files then run the tfsec scan, and decide whether to allow or deny the commit accordingly.
-if [[ "$TERRAFORM_FILES_STAGED" = "yes" ]];
+if [[ "$TERRAFORM_FILES_STAGED" = "yes" ]]
 then
   # copy the terraform files to the working directory
   copy-tf-files-to-be-scanned
