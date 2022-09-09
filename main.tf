@@ -37,6 +37,7 @@ provider "aws" {
 #}
 
 #call a module
+#fred is here 
 module "raj_otherstuff" {
   source = "./modules/otherstuff"
 }
