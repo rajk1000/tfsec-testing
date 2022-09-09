@@ -69,7 +69,7 @@ copy-tf-files-to-be-scanned() {
     if [[ $value == *.tf ]]
     then
       show-msg "FILE: $value"
-      cp "$value" "$TFSEC_WORKING_DIR"
+      cp "${value}" "${TFSEC_WORKING_DIR}"
     fi
 
     # check if the tfsec-scan-output file has been staged
@@ -78,7 +78,7 @@ copy-tf-files-to-be-scanned() {
       # by staging this file, the user has indicated that they want to allow through the commit despite the tfsec issues.
       ALLOW_TFSEC_ISSUES="yes"
       # also copy this to the same directory so that a diff can take place later between this staged file and the latest scan output
-      cp "$value" "$TFSEC_WORKING_DIR"
+      cp "${value}" "${TFSEC_WORKING_DIR}"
     fi
   done
 }
@@ -91,12 +91,12 @@ copy-tf-files-to-be-scanned() {
 remove-timing-stats-from-scan-output() {
   # remove any timing stats from the file, as these are problematic when doing a diff
   # firstly, save the file before any sed replacement just in case we wish to troubleshoot
-  cp "$TFSEC_RESULTS_DIR/$RESULTS_FILE" "$TFSEC_RESULTS_DIR"/tfsec-scan-output-orig.txt
-  sed -i '/^  disk i/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
-  sed -i '/^  parsing/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
-  sed -i '/^  adaptation/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
-  sed -i '/^  checks/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
-  sed -i '/^  total/d' "$TFSEC_RESULTS_DIR/$RESULTS_FILE"
+  cp "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}" "${TFSEC_RESULTS_DIR}"/tfsec-scan-output-orig.txt
+  sed -i '/^  disk i/d' "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}"
+  sed -i '/^  parsing/d' "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}"
+  sed -i '/^  adaptation/d' "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}"
+  sed -i '/^  checks/d' "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}"
+  sed -i '/^  total/d' "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}"
 }
 
 # *****************************************************************************************
@@ -141,7 +141,7 @@ deny-commit-outstanding-tfsec-issues() {
 #   This function shows an INFO level message to stdout.
 # *****************************************************************************************
 show-msg() {
-  echo "$PREFIX - INFO - ${1}"
+  echo "${PREFIX} - INFO - ${1}"
 }
 
 # *****************************************************************************************
@@ -149,7 +149,7 @@ show-msg() {
 #   This function shows an ERROR level message to stdout
 # *****************************************************************************************
 show-err() {
-  echo "$PREFIX - ERROR - ${1}"
+  echo "${PREFIX} - ERROR - ${1}"
 }
 
 # *****************************************************************************************
@@ -172,7 +172,7 @@ then
   copy-tf-files-to-be-scanned
 
   # do the latest tfsec scan on the files that have been staged
-  if ! tfsec "$TFSEC_WORKING_DIR" --no-colour --out "$TFSEC_RESULTS_DIR/$RESULTS_FILE";
+  if ! tfsec "$TFSEC_WORKING_DIR" --no-colour --out "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}";
   then
     # remove the timing stats from the results so that any two results files can be compared
     remove-timing-stats-from-scan-output
@@ -181,7 +181,7 @@ then
     if [[ "$ALLOW_TFSEC_ISSUES" = "yes" ]]
     then
       # check that the file added is exactly the same as the latest tfsec issues. They must be identical in order for the commit to be allowed through
-      DIFF_RESULT="$(diff "$TFSEC_RESULTS_DIR/$RESULTS_FILE" "$TFSEC_WORKING_DIR/$RESULTS_FILE")"
+      DIFF_RESULT="$(diff "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}" "${TFSEC_WORKING_DIR}/${RESULTS_FILE}")"
       if [ $? -eq 0 ]
       then
         # allow the commit
