@@ -1,4 +1,4 @@
-old issues
+
 Result #1 HIGH No public access block so not blocking public acls 
 ────────────────────────────────────────────────────────────────────────────────
   main.tf:13-37
