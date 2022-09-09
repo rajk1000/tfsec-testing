@@ -37,7 +37,8 @@ resource "aws_s3_bucket" "foo-bucket" {
 }
 
 #call a module
-#fred is here 
+#fred is here
+#hello world
 module "raj_otherstuff" {
   source = "./modules/otherstuff"
 }
