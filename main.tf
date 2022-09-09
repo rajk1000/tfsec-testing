@@ -12,7 +12,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "foo-bucket" {
   region        = var.region
-  bucket        = local.bucket_name
+  bucket        = "fred"
   force_destroy = true
 
   tags = {
