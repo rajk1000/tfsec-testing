@@ -18,6 +18,12 @@ initialise() {
   create-directory "$TFSEC_WORKING_DIR"
   create-directory "$TFSEC_RESULTS_DIR"
   ALLOW_TFSEC_ISSUES="no"
+  if [ x"${TFSEC_PRECOMMIT_ARGS}" == "x" ];
+  then
+    show-msg "TFSEC_PRECOMMIT_ARGS variable not set. So we will call tfsec with no additional arguments.."
+  else
+    show-msg "TFSEC_PRECOMMIT_ARGS variable IS set. So we will call tfsec with these additional ARGS of $TFSEC_PRECOMMIT_ARGS"
+  fi
 }
 
 # *****************************************************************************************
@@ -173,7 +179,7 @@ then
   copy-tf-files-to-be-scanned
 
   # do the latest tfsec scan on the files that have been staged
-  if ! tfsec "$TFSEC_WORKING_DIR" --no-colour --out "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}";
+  if ! tfsec "$TFSEC_WORKING_DIR" $TFSEC_PRECOMMIT_ARGS --no-colour --out "${TFSEC_RESULTS_DIR}/${RESULTS_FILE}";
   then
     # remove the timing stats from the results so that any two results files can be compared
     remove-timing-stats-from-scan-output
