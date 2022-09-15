@@ -1,8 +1,7 @@
 variable "region" {
   default = "eu-west-2"
 }
-#raj added a new jhkhkjh fred comment
-#raj added another new comment
+#raj added a new comment
 provider "aws" {
   alias  = "sandbox"
   region = var.region
@@ -13,7 +12,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "foo-bucket" {
   region        = var.region
-  bucket        = "fred"
+  bucket        = local.bucket_name
   force_destroy = true
 
   tags = {
@@ -38,8 +37,6 @@ resource "aws_s3_bucket" "foo-bucket" {
 }
 
 #call a module
-#fred is here
-#hello world
 module "raj_otherstuff" {
   source = "./modules/otherstuff"
 }

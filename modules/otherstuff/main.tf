@@ -7,7 +7,7 @@ resource "aws_security_group" "bastion_sg" {
     name = "bastion_sg"
     vpc_id = aws_vpc.main.id
 }
-
+#tidy up comment
 resource "aws_security_group_rule" "bastion_sg_ingress" {
     security_group_id = aws_security_group.bastion_sg.id
 #rajk just adding harmless comment  

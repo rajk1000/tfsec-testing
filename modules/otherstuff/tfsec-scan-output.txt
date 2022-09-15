@@ -1,17 +1,17 @@
-fredfredfredfred
+
 Result #1 HIGH No public access block so not blocking public acls 
 ────────────────────────────────────────────────────────────────────────────────
-  main.tf:14-38
+  main.tf:13-37
 ────────────────────────────────────────────────────────────────────────────────
-   14  ┌ resource "aws_s3_bucket" "foo-bucket" {
-   15  │   region        = var.region
-   16  │   bucket        = "fred"
-   17  │   force_destroy = true
-   18  │ 
-   19  │   tags = {
-   20  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
-   21  │   }
-   22  └   versioning {
+   13  ┌ resource "aws_s3_bucket" "foo-bucket" {
+   14  │   region        = var.region
+   15  │   bucket        = "fred"
+   16  │   force_destroy = true
+   17  │ 
+   18  │   tags = {
+   19  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
+   20  │   }
+   21  └   versioning {
    ..  
 ────────────────────────────────────────────────────────────────────────────────
           ID aws-s3-block-public-acls
@@ -26,17 +26,17 @@ Result #1 HIGH No public access block so not blocking public acls
 
 Result #2 HIGH No public access block so not blocking public policies 
 ────────────────────────────────────────────────────────────────────────────────
-  main.tf:14-38
+  main.tf:13-37
 ────────────────────────────────────────────────────────────────────────────────
-   14  ┌ resource "aws_s3_bucket" "foo-bucket" {
-   15  │   region        = var.region
-   16  │   bucket        = "fred"
-   17  │   force_destroy = true
-   18  │ 
-   19  │   tags = {
-   20  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
-   21  │   }
-   22  └   versioning {
+   13  ┌ resource "aws_s3_bucket" "foo-bucket" {
+   14  │   region        = var.region
+   15  │   bucket        = "fred"
+   16  │   force_destroy = true
+   17  │ 
+   18  │   tags = {
+   19  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
+   20  │   }
+   21  └   versioning {
    ..  
 ────────────────────────────────────────────────────────────────────────────────
           ID aws-s3-block-public-policy
@@ -51,17 +51,17 @@ Result #2 HIGH No public access block so not blocking public policies
 
 Result #3 HIGH No public access block so not ignoring public acls 
 ────────────────────────────────────────────────────────────────────────────────
-  main.tf:14-38
+  main.tf:13-37
 ────────────────────────────────────────────────────────────────────────────────
-   14  ┌ resource "aws_s3_bucket" "foo-bucket" {
-   15  │   region        = var.region
-   16  │   bucket        = "fred"
-   17  │   force_destroy = true
-   18  │ 
-   19  │   tags = {
-   20  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
-   21  │   }
-   22  └   versioning {
+   13  ┌ resource "aws_s3_bucket" "foo-bucket" {
+   14  │   region        = var.region
+   15  │   bucket        = "fred"
+   16  │   force_destroy = true
+   17  │ 
+   18  │   tags = {
+   19  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
+   20  │   }
+   21  └   versioning {
    ..  
 ────────────────────────────────────────────────────────────────────────────────
           ID aws-s3-ignore-public-acls
@@ -76,17 +76,17 @@ Result #3 HIGH No public access block so not ignoring public acls
 
 Result #4 HIGH No public access block so not restricting public buckets 
 ────────────────────────────────────────────────────────────────────────────────
-  main.tf:14-38
+  main.tf:13-37
 ────────────────────────────────────────────────────────────────────────────────
-   14  ┌ resource "aws_s3_bucket" "foo-bucket" {
-   15  │   region        = var.region
-   16  │   bucket        = "fred"
-   17  │   force_destroy = true
-   18  │ 
-   19  │   tags = {
-   20  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
-   21  │   }
-   22  └   versioning {
+   13  ┌ resource "aws_s3_bucket" "foo-bucket" {
+   14  │   region        = var.region
+   15  │   bucket        = "fred"
+   16  │   force_destroy = true
+   17  │ 
+   18  │   tags = {
+   19  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
+   20  │   }
+   21  └   versioning {
    ..  
 ────────────────────────────────────────────────────────────────────────────────
           ID aws-s3-no-public-buckets
@@ -101,17 +101,17 @@ Result #4 HIGH No public access block so not restricting public buckets
 
 Result #5 LOW Bucket does not have a corresponding public access block. 
 ────────────────────────────────────────────────────────────────────────────────
-  main.tf:14-38
+  main.tf:13-37
 ────────────────────────────────────────────────────────────────────────────────
-   14  ┌ resource "aws_s3_bucket" "foo-bucket" {
-   15  │   region        = var.region
-   16  │   bucket        = "fred"
-   17  │   force_destroy = true
-   18  │ 
-   19  │   tags = {
-   20  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
-   21  │   }
-   22  └   versioning {
+   13  ┌ resource "aws_s3_bucket" "foo-bucket" {
+   14  │   region        = var.region
+   15  │   bucket        = "fred"
+   16  │   force_destroy = true
+   17  │ 
+   18  │   tags = {
+   19  │     Name = "foo-${data.aws_caller_identity.current.account_id}"
+   20  │   }
+   21  └   versioning {
    ..  
 ────────────────────────────────────────────────────────────────────────────────
           ID aws-s3-specify-public-access-block
